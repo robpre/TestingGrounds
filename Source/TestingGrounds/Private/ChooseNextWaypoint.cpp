@@ -3,9 +3,8 @@
 
 #include "ChooseNextWaypoint.h"
 #include "BehaviorTree/BlackboardComponent.h"
-// TODO unlink this architecture
-#include "PatrollingGuard.h"
 #include "Classes/AIController.h"
+#include "PatrolRoute.h"
 
 EBTNodeResult::Type UChooseNextWaypoint::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
@@ -14,11 +13,15 @@ EBTNodeResult::Type UChooseNextWaypoint::ExecuteTask(UBehaviorTreeComponent& Own
 
     AAIController* AIOwner = OwnerComp.GetAIOwner();
 
-    if (!AIOwner || !AIOwner->GetPawn()) { return EBTNodeResult::Failed; }
+    if (!ensure(AIOwner)) { return EBTNodeResult::Failed; }
 
     TArray<AActor*> PatrolPoints = GetPatrolPoints(AIOwner->GetPawn());
 
-    if (PatrolPoints.Num() == 0) { return EBTNodeResult::Failed; }
+    if (PatrolPoints.Num() == 0) {
+        UE_LOG(LogTemp, Warning, TEXT("AI:%s is missing PatrolPoints"), *AIOwner->GetName());
+
+        return EBTNodeResult::Failed;
+    }
 
     BlackboardComponent->SetValueAsObject(
         NextWaypointKey.SelectedKeyName,
@@ -29,13 +32,15 @@ EBTNodeResult::Type UChooseNextWaypoint::ExecuteTask(UBehaviorTreeComponent& Own
 
     BlackboardComponent->SetValueAsInt(IndexKey.SelectedKeyName, NextIndex);
 
-    // UE_LOG(LogTemp, Warning, TEXT("Boop my snoot %i"), Index);
-
     return EBTNodeResult::Succeeded;
 }
 
 TArray<AActor*> UChooseNextWaypoint::GetPatrolPoints(APawn* ControlledPawn) const {
-    APatrollingGuard* Guard = Cast<APatrollingGuard>(ControlledPawn);
+    if (!ensure(ControlledPawn)) { return TArray<AActor*>(); }
 
-    return Guard->PatrolPoints;
+    UPatrolRoute* PatrolRoute = ControlledPawn->FindComponentByClass<UPatrolRoute>();
+
+    if (!ensure(PatrolRoute)) { return TArray<AActor*>(); }
+
+    return PatrolRoute->GetPatrolPoints();
 }
