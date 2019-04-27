@@ -1,7 +1,7 @@
 // Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
 
 #include "TestingGroundsGameMode.h"
-#include "TestingGroundsHUD.h"
+#include "FirstPersonHUD.h"
 #include "Player/FirstPersonCharacter.h"
 #include "UObject/ConstructorHelpers.h"
 
@@ -13,5 +13,5 @@ ATestingGroundsGameMode::ATestingGroundsGameMode()
 	DefaultPawnClass = PlayerPawnClassFinder.Class;
 
 	// use our custom HUD class
-	HUDClass = ATestingGroundsHUD::StaticClass();
+	HUDClass = AFirstPersonHUD::StaticClass();
 }
