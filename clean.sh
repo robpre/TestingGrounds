@@ -1,0 +1,1 @@
+rm -r Binaries Intermediate Saved
