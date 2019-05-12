@@ -20,13 +20,13 @@ AGun::AGun()
 	// GunMesh->bCastDynamicShadow = false;
 	// GunMesh->CastShadow = false;
 	// // GunMesh->SetupAttachment(Mesh1P, TEXT("GripPoint"));
-	SetRootComponent(GunMesh);
+	// SetRootComponent(GunMesh);
 
 	MuzzleLocation = CreateDefaultSubobject<USceneComponent>(TEXT("MuzzleLocation"));
-	MuzzleLocation->SetupAttachment(RootComponent);
+	MuzzleLocation->SetupAttachment(GunMesh);
 	MuzzleLocation->SetRelativeLocation(FVector(0.2f, 53.4f, 11.4f));
 
-	GunOffset = FVector(100.0f, 0.0f, 10.0f);
+	GunOffset = FVector(0.f);
 }
 
 // Called when the game starts or when spawned
@@ -44,7 +44,6 @@ void AGun::Tick(float DeltaTime)
 
 }
 
-// Called every frame
 void AGun::OnFire()
 {
 	// try and fire a projectile
@@ -59,7 +58,7 @@ void AGun::OnFire()
 				(MuzzleLocation != nullptr)
 				? MuzzleLocation->GetComponentLocation()
 				: GetActorLocation()
-			) + SpawnRotation.RotateVector(GunOffset);
+			);// + SpawnRotation.RotateVector(GunOffset);
 
 			//Set Spawn Collision Handling Override
 			FActorSpawnParameters ActorSpawnParams;

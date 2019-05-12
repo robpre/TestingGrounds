@@ -25,6 +25,14 @@ class AFirstPersonCharacter : public ACharacter
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
 	class USceneComponent* VR_MuzzleLocation;
 
+	/** Projectile class to spawn */
+	UPROPERTY(EditDefaultsOnly, Category=Projectile)
+	TSubclassOf<class AGun> GunClass;
+
+	/** Location on VR gun mesh where projectiles should spawn. */
+	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
+	class AGun* FP_Gun;
+
 	/** First person camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FirstPersonCameraComponent;
@@ -42,6 +50,8 @@ public:
 
 protected:
 	virtual void BeginPlay();
+
+	void OnFire();
 
 public:
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */

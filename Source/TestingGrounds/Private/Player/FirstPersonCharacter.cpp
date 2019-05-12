@@ -1,6 +1,7 @@
 // Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
 
 #include "Player/FirstPersonCharacter.h"
+#include "Weapons/Gun.h"
 #include "Weapons/BallProjectile.h"
 #include "Animation/AnimInstance.h"
 #include "Camera/CameraComponent.h"
@@ -74,9 +75,17 @@ void AFirstPersonCharacter::BeginPlay()
 	// Call the base class
 	Super::BeginPlay();
 
-	//Attach gun mesh component to Skeleton, doing it here because the skeleton is not yet created in the constructor
-	// FP_Gun->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
+	if (GunClass != nullptr && GetWorld()) {
+		FP_Gun = GetWorld()->SpawnActor<AGun>(GunClass);
 
+		FP_Gun->AttachToComponent(
+			Mesh1P,
+			FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true),
+			TEXT("GripPoint")
+		);
+
+		FP_Gun->AnimInstance = Mesh1P->GetAnimInstance();
+	}
 	// Show or hide the two versions of the gun based on whether or not we're using motion controllers.
 	if (bUsingMotionControllers)
 	{
@@ -103,7 +112,7 @@ void AFirstPersonCharacter::SetupPlayerInputComponent(class UInputComponent* Pla
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
 	// Bind fire event
-	// PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AFirstPersonCharacter::OnFire);
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AFirstPersonCharacter::OnFire);
 
 	// Enable touchscreen input
 	EnableTouchscreenMovement(PlayerInputComponent);
@@ -123,6 +132,11 @@ void AFirstPersonCharacter::SetupPlayerInputComponent(class UInputComponent* Pla
 	PlayerInputComponent->BindAxis("LookUpRate", this, &AFirstPersonCharacter::LookUpAtRate);
 }
 
+void AFirstPersonCharacter::OnFire()
+{
+	FP_Gun->OnFire();
+}
+
 void AFirstPersonCharacter::OnResetVR()
 {
 	UHeadMountedDisplayFunctionLibrary::ResetOrientationAndPosition();
@@ -136,7 +150,7 @@ void AFirstPersonCharacter::BeginTouch(const ETouchIndex::Type FingerIndex, cons
 	}
 	if ((FingerIndex == TouchItem.FingerIndex) && (TouchItem.bMoved == false))
 	{
-		// OnFire();
+		FP_Gun->OnFire();
 	}
 	TouchItem.bIsPressed = true;
 	TouchItem.FingerIndex = FingerIndex;
